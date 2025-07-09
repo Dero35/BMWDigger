@@ -1,0 +1,79 @@
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
+#include <Wire.h>
+
+Adafruit_SSD1306 display(128, 64, &Wire, 4);
+
+static const unsigned char PROGMEM image_arrow_right_copy_bits[] = {0x08,0x04,0xfe,0x04,0x08};
+static const unsigned char PROGMEM image_battery_charging_bits[] = {0x00,0x02,0x00,0x0f,0xe4,0xfe,0x10,0x0c,0x01,0x10,0x08,0x01,0x70,0x18,0x01,0x80,0x30,0x01,0x80,0x3f,0x81,0x80,0x7f,0x01,0x80,0x03,0x01,0x80,0x06,0x01,0x70,0x04,0x01,0x10,0x0c,0x01,0x10,0x08,0x01,0x0f,0xd3,0xfe,0x00,0x10,0x00,0x00,0x00,0x00};
+static const unsigned char PROGMEM image_Drill_bits[] = {0x02,0x00,0x02,0x00,0x05,0x00,0x05,0x00,0x08,0x80,0x08,0x80,0x0e,0x80,0x11,0xc0,0x10,0x40,0x20,0x20,0x38,0x20,0x27,0x20,0x40,0xd0,0x40,0x10,0x80,0x08,0xff,0xf8,0x88,0x00,0x87,0xf0,0x80,0x08,0x70,0x70,0x0f,0x80};
+
+int progress = 1;
+
+void drawDynamic(void) {
+    // Progress
+    display.fillRect(12, 49, progress, 7, 1);
+
+    display.display();
+}
+
+void drawStatic(void) {
+    display.clearDisplay();
+
+    // Box
+    display.drawRect(10, 47, 108, 11, 1);
+
+    // Loading
+    display.setTextColor(1);
+    display.setTextWrap(false);
+    display.setCursor(9, 37);
+    display.print("Loading:");
+
+    
+
+    // Title
+    display.setCursor(27, 10);
+    display.print("SPIN ON");
+
+    // arrow_right copy
+    display.drawBitmap(40, 23, image_arrow_right_copy_bits, 7, 5, 1);
+
+    // arrow_right
+    display.drawBitmap(27, 23, image_arrow_right_copy_bits, 7, 5, 1);
+
+    // arrow_right copy
+    display.drawBitmap(66, 23, image_arrow_right_copy_bits, 7, 5, 1);
+
+    // arrow_right copy
+    display.drawBitmap(53, 23, image_arrow_right_copy_bits, 7, 5, 1);
+
+    // battery_charging
+    display.drawBitmap(94, 18, image_battery_charging_bits, 24, 16, 1);
+
+    // Drill
+    display.drawBitmap(9, 10, image_Drill_bits, 13, 21, 1);
+
+    display.display();
+}
+
+
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  drawStatic();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  progress += 1;
+  Serial.println(progress);
+  if (progress >= 105) {
+    display.fillRect(12, 49, 104, 7, 0);
+    progress = 1;
+  }
+  drawDynamic();
+  delay(10); // this speeds up the simulation
+}
+
