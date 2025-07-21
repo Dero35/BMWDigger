@@ -20,17 +20,70 @@ const unsigned char* bitmap_btn_codes[3] = {
 
 const int NUM_ITEMS = 3;
 
+// Button pins
+const int BUTTON_UP = 18;    // Previous item (UP)
+const int BUTTON_DOWN = 19;  // Next item (DOWN)
+
+// Button state variables
+bool button_up_pressed = false;
+bool button_down_pressed = false;
+unsigned long last_button_time = 0;
+const unsigned long DEBOUNCE_DELAY = 200; // 200ms debounce
 
 int item_selected = 0;
 int prev_item;
 int next_item;
 
 void setup() {
+  Serial.begin(115200);
+  
   u8g2.begin();
   u8g2.setColorIndex(1);
+  
+  // Setup button pins with internal pull-up resistors
+  pinMode(BUTTON_UP, INPUT_PULLUP);
+  pinMode(BUTTON_DOWN, INPUT_PULLUP);
+  
+  Serial.println("Menu System Ready!");
+  Serial.println("Button UP: GPIO18, Button DOWN: GPIO19");
+}
+
+void handleButtons() {
+  unsigned long current_time = millis();
+  
+  // Check if enough time has passed since last button press (debouncing)
+  if (current_time - last_button_time > DEBOUNCE_DELAY) {
+    
+    // Check UP button (Previous item)
+    if (digitalRead(BUTTON_UP) == LOW && !button_up_pressed) {
+      button_up_pressed = true;
+      item_selected = (item_selected - 1 + NUM_ITEMS) % NUM_ITEMS;
+      last_button_time = current_time;
+      Serial.print("UP pressed - Item selected: ");
+      Serial.println(item_selected);
+    }
+    else if (digitalRead(BUTTON_UP) == HIGH) {
+      button_up_pressed = false;
+    }
+    
+    // Check DOWN button (Next item)
+    if (digitalRead(BUTTON_DOWN) == LOW && !button_down_pressed) {
+      button_down_pressed = true;
+      item_selected = (item_selected + 1) % NUM_ITEMS;
+      last_button_time = current_time;
+      Serial.print("DOWN pressed - Item selected: ");
+      Serial.println(item_selected);
+    }
+    else if (digitalRead(BUTTON_DOWN) == HIGH) {
+      button_down_pressed = false;
+    }
+  }
 }
 
 void loop() {
+  // Handle button input
+  handleButtons();
+  
   // Calculate prev and next items with proper 0-based indexing
   prev_item = (item_selected - 1 + NUM_ITEMS) % NUM_ITEMS;
   next_item = (item_selected + 1) % NUM_ITEMS;
@@ -58,7 +111,6 @@ void loop() {
 
   u8g2.sendBuffer();
 
-  // Auto-cycle through menu items for demo
-  delay(2000);
-  item_selected = (item_selected + 1) % NUM_ITEMS;
+  // Small delay to prevent excessive CPU usage
+  delay(50);
 }
