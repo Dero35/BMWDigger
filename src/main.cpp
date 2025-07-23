@@ -2,6 +2,7 @@
 #include <U8g2lib.h>
 #include <Wire.h>
 #include "menu.h"
+#include "intro_screen.h"
 #include "pages/page_info.h"
 #include "pages/page_basic_data.h"
 #include "pages/page_oil_temp.h"
@@ -52,7 +53,7 @@ const char* menu_names[4] = {
 };
 
 // Add state management
-AppState current_state = STATE_MENU;
+AppState current_state = STATE_INTRO;
 
 int item_selected = 0;
 int prev_item;
@@ -162,6 +163,10 @@ void handleMenuButtons() {
 void loop() {
   // State machine
   switch(current_state) {
+    case STATE_INTRO:
+      handleIntroScreen();
+      break;
+      
     case STATE_MENU:
       handleMenuButtons();
       drawMenu();

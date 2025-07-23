@@ -5,6 +5,7 @@
 
 // Menu states
 enum AppState {
+  STATE_INTRO,
   STATE_MENU,
   STATE_PAGE_INFO,
   STATE_PAGE_BASIC_DATA,
